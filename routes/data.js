@@ -41,11 +41,10 @@ router.get("/", async (req, res) => {
       footer: () => Footer.find({ userId }),
       locations: () => Location.find({ userId }),
       nav: () => Nav.find({ userId }),
-      data: () => Data.find({ userId }),
       menu: () => Dish.find({ userId }),
       features: () => FeatureSection.find({ userId }),
       reviews: () => Review.find({ userId }),
-      giftCards: () => GiftCard.find({ userId }),
+      giftcard: () => GiftCard.find({ userId }), 
     };
 
     let selectedSections;
