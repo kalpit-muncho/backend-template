@@ -60,4 +60,27 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// PATCH: Add a question to the FAQ section (by id) for a user
+router.patch("/:id/add-question", async (req, res) => {
+  try {
+    const { question, userId } = req.body;
+    if (!userId) return res.status(400).json({ error: "userId is required" });
+    if (!question || !question.title || !question.description) {
+      return res
+        .status(400)
+        .json({ error: "Question with title and description is required" });
+    }
+    const faq = await FAQ.findOneAndUpdate(
+      { _id: req.params.id, userId },
+      { $push: { questions: question } },
+      { new: true }
+    );
+    if (!faq)
+      return res.status(404).json({ error: "FAQ not found or not authorized" });
+    res.json(faq);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 module.exports = router;
