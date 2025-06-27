@@ -10,6 +10,7 @@ const { Nav } = require("../models/NavFooter");
 const Dish = require("../models/Dish"); // Added for menu
 const FeatureSection = require("../models/FeatureSection"); // Added for features
 const Review = require("../models/Review"); // Added for reviews
+const GiftCard = require("../models/GiftCard"); // Added for gift cards
 
 // Middleware example: log request method and path
 router.use((req, res, next) => {
@@ -48,6 +49,7 @@ router.get("/", async (req, res) => {
       menu: () => Dish.find({ userId }).sort({ createdAt: -1 }), // Added for menu
       features: () => FeatureSection.find({ userId }), // Added for features
       reviews: () => Review.find({ userId }), // Added for reviews
+      giftCards: () => GiftCard.find({ userId }), // Added for gift cards
     };
 
     let selectedSections;
