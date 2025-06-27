@@ -46,10 +46,10 @@ router.get("/", async (req, res) => {
       locations: () => Location.find({ userId }).sort({ createdAt: -1 }),
       nav: () => Nav.find({ userId }).sort({ createdAt: -1 }),
       data: () => Data.find({ userId }).sort({ createdAt: -1 }),
-      menu: () => Dish.find({ userId }).sort({ createdAt: -1 }), // Added for menu
-      features: () => FeatureSection.find({ userId }), // Added for features
-      reviews: () => Review.find({ userId }), // Added for reviews
-      giftCards: () => GiftCard.find({ userId }), // Added for gift cards
+      menu: () => Dish.find({ userId }).sort({ createdAt: -1 }), 
+      features: () => FeatureSection.find({ userId }), 
+      reviews: () => Review.find({ userId }), 
+      giftCards: () => GiftCard.find({ userId }), 
     };
 
     let selectedSections;
