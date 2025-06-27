@@ -7,18 +7,16 @@ const FAQ = require("../models/FAQ");
 const Footer = require("../models/Footer");
 const Location = require("../models/Location");
 const { Nav } = require("../models/NavFooter");
-const Dish = require("../models/Dish"); // Added for menu
-const FeatureSection = require("../models/FeatureSection"); // Added for features
-const Review = require("../models/Review"); // Added for reviews
-const GiftCard = require("../models/GiftCard"); // Added for gift cards
+const Dish = require("../models/Dish"); 
+const FeatureSection = require("../models/FeatureSection"); 
+const Review = require("../models/Review"); 
+const GiftCard = require("../models/GiftCard"); 
 
-// Middleware example: log request method and path
 router.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
 
-// POST: Upload data for a user
 router.post("/", async (req, res) => {
   try {
     const { title, content, userId } = req.body;
@@ -31,30 +29,27 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET: Retrieve all section data for a user
 router.get("/", async (req, res) => {
   try {
     const { userId, sections } = req.query;
     if (!userId) return res.status(400).json({ error: "userId is required" });
 
-    // Map section keys to their corresponding model queries
     const sectionMap = {
-      hero: () => Hero.find({ userId }).sort({ createdAt: -1 }),
-      gallery: () => Gallery.find({ userId }).sort({ createdAt: -1 }),
-      faq: () => FAQ.find({ userId }).sort({ createdAt: -1 }),
-      footer: () => Footer.find({ userId }).sort({ createdAt: -1 }),
-      locations: () => Location.find({ userId }).sort({ createdAt: -1 }),
-      nav: () => Nav.find({ userId }).sort({ createdAt: -1 }),
-      data: () => Data.find({ userId }).sort({ createdAt: -1 }),
-      menu: () => Dish.find({ userId }).sort({ createdAt: -1 }), 
-      features: () => FeatureSection.find({ userId }), 
-      reviews: () => Review.find({ userId }), 
-      giftCards: () => GiftCard.find({ userId }), 
+      hero: () => Hero.find({ userId }),
+      gallery: () => Gallery.find({ userId }),
+      faq: () => FAQ.find({ userId }),
+      footer: () => Footer.find({ userId }),
+      locations: () => Location.find({ userId }),
+      nav: () => Nav.find({ userId }),
+      data: () => Data.find({ userId }),
+      menu: () => Dish.find({ userId }),
+      features: () => FeatureSection.find({ userId }),
+      reviews: () => Review.find({ userId }),
+      giftCards: () => GiftCard.find({ userId }),
     };
 
     let selectedSections;
     if (sections) {
-      // Parse comma-separated list, trim whitespace, and filter valid keys
       selectedSections = sections
         .split(",")
         .map((s) => s.trim().toLowerCase())
@@ -63,18 +58,18 @@ router.get("/", async (req, res) => {
         return res.status(400).json({ error: "No valid sections provided" });
       }
     } else {
-      // Default: all sections
       selectedSections = Object.keys(sectionMap);
     }
 
-    // Fetch only the requested sections
     const results = await Promise.all(
       selectedSections.map((key) => sectionMap[key]())
     );
-    // Build response object
     const response = {};
     selectedSections.forEach((key, idx) => {
-      response[key] = results[idx];
+      const value = Array.isArray(results[idx])
+        ? results[idx][0] || null
+        : results[idx];
+      response[key] = value;
     });
     res.json(response);
   } catch (err) {
@@ -115,33 +110,6 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Data deleted" });
   } catch (err) {
     res.status(400).json({ error: err.message });
-  }
-});
-
-// GET: Retrieve all data for preview (section-wise)
-router.get("/preview", async (req, res) => {
-  try {
-    const [heros, galleries, faqs, footers, locations, navs, datas] =
-      await Promise.all([
-        Hero.find().sort({ createdAt: -1 }),
-        Gallery.find().sort({ createdAt: -1 }),
-        FAQ.find().sort({ createdAt: -1 }),
-        Footer.find().sort({ createdAt: -1 }),
-        Location.find().sort({ createdAt: -1 }),
-        Nav.find().sort({ createdAt: -1 }),
-        Data.find().sort({ createdAt: -1 }),
-      ]);
-    res.json({
-      hero: heros,
-      gallery: galleries,
-      faq: faqs,
-      footer: footers,
-      location: locations,
-      nav: navs,
-      data: datas,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
 });
 
