@@ -65,10 +65,7 @@ router.get("/", async (req, res) => {
     );
     const response = {};
     selectedSections.forEach((key, idx) => {
-      const value = Array.isArray(results[idx])
-        ? results[idx][0] || null
-        : results[idx];
-      response[key] = value;
+      response[key] = results[idx];
     });
     res.json(response);
   } catch (err) {
