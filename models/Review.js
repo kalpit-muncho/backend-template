@@ -6,6 +6,10 @@ const ReviewSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  profileUrl: {
+    type: String,
+    required: false,
+  },
   reviews: [
     {
       name: { type: String, required: true },

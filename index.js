@@ -45,6 +45,7 @@ const reviewRouter = require("./routes/review");
 const giftCardRouter = require("./routes/giftcard");
 const appearanceRouter = require("./routes/appearance");
 const cardRouter = require("./routes/card");
+const googlePlacesRouter = require("./routes/googlePlaces");
 
 app.use("/api/data", dataRoutes);
 app.use("/api/hero", heroRoutes);
@@ -60,6 +61,7 @@ app.use("/api/review", reviewRouter);
 app.use("/api/giftcard", giftCardRouter);
 app.use("/api/appearance", appearanceRouter);
 app.use("/api/card", cardRouter);
+app.use("/api/google-places", googlePlacesRouter);
 
 // ✅ Health check route
 app.get("/", (req, res) => {
