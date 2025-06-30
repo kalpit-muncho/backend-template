@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
       features: () => FeatureSection.find({ userId }),
       reviews: () => Review.find({ userId }),
       giftcards: () => GiftCard.find({ userId }),
-      card: () => Card.findOne({ userId }),
+      cards: () => Card.findOne({ userId }),
     };
 
     let selectedSections;
