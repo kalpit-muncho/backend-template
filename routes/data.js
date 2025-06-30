@@ -7,10 +7,11 @@ const FAQ = require("../models/FAQ");
 const Footer = require("../models/Footer");
 const Location = require("../models/Location");
 const { Nav } = require("../models/NavFooter");
-const Dish = require("../models/Dish"); 
-const FeatureSection = require("../models/FeatureSection"); 
-const Review = require("../models/Review"); 
-const GiftCard = require("../models/GiftCard"); 
+const Dish = require("../models/Dish");
+const FeatureSection = require("../models/FeatureSection");
+const Review = require("../models/Review");
+const GiftCard = require("../models/GiftCard");
+const Appearance = require("../models/Appearance");
 
 router.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
@@ -44,7 +45,7 @@ router.get("/", async (req, res) => {
       menu: () => Dish.find({ userId }),
       features: () => FeatureSection.find({ userId }),
       reviews: () => Review.find({ userId }),
-      giftcards: () => GiftCard.find({ userId }), 
+      giftcards: () => GiftCard.find({ userId }),
     };
 
     let selectedSections;
@@ -63,10 +64,12 @@ router.get("/", async (req, res) => {
     const results = await Promise.all(
       selectedSections.map((key) => sectionMap[key]())
     );
+    const appearance = await Appearance.findOne({ userId });
     const response = {};
     selectedSections.forEach((key, idx) => {
       response[key] = results[idx];
     });
+    response.appearance = appearance;
     res.json(response);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -108,5 +111,4 @@ router.delete("/:id", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-
 module.exports = router;
