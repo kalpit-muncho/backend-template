@@ -44,7 +44,7 @@ router.get("/", async (req, res) => {
       menu: () => Dish.find({ userId }),
       features: () => FeatureSection.find({ userId }),
       reviews: () => Review.find({ userId }),
-      giftcard: () => GiftCard.find({ userId }), 
+      giftcards: () => GiftCard.find({ userId }), 
     };
 
     let selectedSections;
