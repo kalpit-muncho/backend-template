@@ -79,4 +79,46 @@ router.delete("/", async (req, res) => {
   }
 });
 
+// Update appearance logo for a user by userId
+router.put("/logo", async (req, res) => {
+  try {
+    const { userId, logo } = req.body;
+    if (!userId || !logo) {
+      return res.status(400).json({ error: "userId and logo are required" });
+    }
+    const appearance = await Appearance.findOneAndUpdate(
+      { userId },
+      { logo },
+      { new: true }
+    );
+    if (!appearance) {
+      return res.status(404).json({ error: "Appearance not found" });
+    }
+    res.status(200).json(appearance);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete only logo for a user by userId
+router.delete("/logo", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+    const appearance = await Appearance.findOneAndUpdate(
+      { userId },
+      { $unset: { logo: "" } },
+      { new: true }
+    );
+    if (!appearance) {
+      return res.status(404).json({ error: "Appearance not found" });
+    }
+    res.json({ message: "Logo deleted", appearance });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 module.exports = router;
