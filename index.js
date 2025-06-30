@@ -44,6 +44,7 @@ const dishRouter = require("./routes/dish");
 const reviewRouter = require("./routes/review");
 const giftCardRouter = require("./routes/giftcard");
 const appearanceRouter = require("./routes/appearance");
+const cardRouter = require("./routes/card");
 
 app.use("/api/data", dataRoutes);
 app.use("/api/hero", heroRoutes);
@@ -58,6 +59,7 @@ app.use("/api/dish", dishRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/giftcard", giftCardRouter);
 app.use("/api/appearance", appearanceRouter);
+app.use("/api/card", cardRouter);
 
 // ✅ Health check route
 app.get("/", (req, res) => {

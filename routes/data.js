@@ -12,6 +12,7 @@ const FeatureSection = require("../models/FeatureSection");
 const Review = require("../models/Review");
 const GiftCard = require("../models/GiftCard");
 const Appearance = require("../models/Appearance");
+const Card = require("../models/Card");
 
 router.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
@@ -46,6 +47,7 @@ router.get("/", async (req, res) => {
       features: () => FeatureSection.find({ userId }),
       reviews: () => Review.find({ userId }),
       giftcards: () => GiftCard.find({ userId }),
+      card: () => Card.findOne({ userId }),
     };
 
     let selectedSections;
