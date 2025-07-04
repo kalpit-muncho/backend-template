@@ -9,6 +9,18 @@ const AppearanceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  metaTitle: {
+    type: String,
+    default: "",
+  },
+  metaDescription: {
+    type: String,
+    default: "",
+  },
+  metaUpdatedAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("Appearance", AppearanceSchema);

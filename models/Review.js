@@ -4,7 +4,6 @@ const ReviewSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    index: true,
   },
   profileUrl: {
     type: String,

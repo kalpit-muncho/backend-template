@@ -71,7 +71,108 @@ router.get("/", async (req, res) => {
     selectedSections.forEach((key, idx) => {
       response[key] = results[idx];
     });
-    response.appearance = appearance;
+    // Remove metaTitle/metaDescription from appearance in response
+    if (appearance) {
+      const { metaTitle, metaDescription, metaUpdatedAt, ...appearanceRest } =
+        appearance.toObject();
+      response.appearance = appearanceRest;
+    } else {
+      response.appearance = null;
+    }
+    const sectionTimestamps = [];
+    for (const key of selectedSections) {
+      const sectionData = response[key];
+      if (Array.isArray(sectionData) && sectionData.length > 0) {
+        sectionData.forEach((item) => {
+          if (item.updatedAt) sectionTimestamps.push(new Date(item.updatedAt));
+          else if (item.createdAt)
+            sectionTimestamps.push(new Date(item.createdAt));
+        });
+      } else if (
+        sectionData &&
+        (sectionData.updatedAt || sectionData.createdAt)
+      ) {
+        if (sectionData.updatedAt)
+          sectionTimestamps.push(new Date(sectionData.updatedAt));
+        else if (sectionData.createdAt)
+          sectionTimestamps.push(new Date(sectionData.createdAt));
+      }
+    }
+    const latestSectionUpdate =
+      sectionTimestamps.length > 0
+        ? new Date(Math.max(...sectionTimestamps.map((d) => d.getTime())))
+        : null;
+    let shouldRegenerateSEO = false;
+    if (
+      !appearance ||
+      !appearance.metaTitle ||
+      !appearance.metaDescription ||
+      !appearance.metaUpdatedAt
+    ) {
+      shouldRegenerateSEO = true;
+    } else if (
+      latestSectionUpdate &&
+      latestSectionUpdate > new Date(appearance.metaUpdatedAt)
+    ) {
+      shouldRegenerateSEO = true;
+    }
+
+    if (shouldRegenerateSEO) {
+      try {
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const siteData = { ...response };
+        const analysisPrompt = `Based on the following website data, generate an SEO-optimized meta title and meta description.\n\nRespond ONLY in the following JSON format:\n{\n  \"metaTitle\": \"...\",\n  \"metaDescription\": \"...\"\n}\n\nWebsite Data: ${JSON.stringify(
+          siteData
+        )}`;
+        const result = await model.generateContent(analysisPrompt);
+        let metaTitle = "";
+        let metaDescription = "";
+        try {
+          const jsonMatch = result.response.text().match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const seoObj = JSON.parse(jsonMatch[0]);
+            metaTitle = seoObj.metaTitle || "";
+            metaDescription = seoObj.metaDescription || "";
+          } else {
+            metaDescription = result.response.text();
+          }
+        } catch (jsonErr) {
+          metaDescription = result.response.text();
+        }
+        response.metaTitle = metaTitle;
+        response.metaDescription = metaDescription;
+        // Save to DB for caching (update or create Appearance)
+        if (appearance) {
+          appearance.metaTitle = metaTitle;
+          appearance.metaDescription = metaDescription;
+          appearance.metaUpdatedAt = latestSectionUpdate || new Date();
+          await appearance.save();
+        } else {
+          // If no appearance exists, create one with meta fields
+          await Appearance.create({
+            userId,
+            logo: "",
+            metaTitle,
+            metaDescription,
+            metaUpdatedAt: latestSectionUpdate || new Date(),
+          });
+        }
+      } catch (seoErr) {
+        response.metaTitle = "";
+        response.metaDescription = "";
+      }
+    } else {
+      // Always fetch the latest from DB after possible update
+      const freshAppearance = await Appearance.findOne({ userId });
+      response.metaTitle = freshAppearance ? freshAppearance.metaTitle : "";
+      response.metaDescription = freshAppearance
+        ? freshAppearance.metaDescription
+        : "";
+    }
+    // --- End SEO Analysis ---
+
     res.json(response);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -92,6 +193,12 @@ router.put("/:id", async (req, res) => {
       return res
         .status(404)
         .json({ error: "Data not found or not authorized" });
+    // Invalidate SEO cache on update
+    const Appearance = require("../models/Appearance");
+    await Appearance.findOneAndUpdate(
+      { userId },
+      { metaTitle: "", metaDescription: "", metaUpdatedAt: null }
+    );
     res.json(data);
   } catch (err) {
     res.status(400).json({ error: err.message });

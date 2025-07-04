@@ -5,28 +5,21 @@ const cors = require("cors");
 
 const app = express();
 
-// ✅ CORS setup - must be placed early
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
-    credentials: true, // needed if using cookies or HTTP auth
+    origin: "http://localhost:5173", 
+    credentials: true, 
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Handle preflight requests for all routes
 app.options("*", cors());
 
-// ✅ Parse JSON body
 app.use(express.json());
 
-// ✅ Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -46,6 +39,7 @@ const giftCardRouter = require("./routes/giftcard");
 const appearanceRouter = require("./routes/appearance");
 const cardRouter = require("./routes/card");
 const googlePlacesRouter = require("./routes/googlePlaces");
+const seoRouter = require("./routes/seo");
 
 app.use("/api/data", dataRoutes);
 app.use("/api/hero", heroRoutes);
@@ -62,6 +56,7 @@ app.use("/api/giftcard", giftCardRouter);
 app.use("/api/appearance", appearanceRouter);
 app.use("/api/card", cardRouter);
 app.use("/api/google-places", googlePlacesRouter);
+app.use("/api", seoRouter);
 
 // ✅ Health check route
 app.get("/", (req, res) => {
